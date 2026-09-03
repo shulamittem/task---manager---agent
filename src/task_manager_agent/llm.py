@@ -18,8 +18,10 @@ if not GOOGLE_API_KEY:
         "GOOGLE_API_KEY is not set. Copy .env.example to .env and fill it in."
     )
 
-# Milliseconds, per the google-genai SDK's HttpOptions contract.
-REQUEST_TIMEOUT_MS = 30_000
+# Milliseconds, per the google-genai SDK's HttpOptions contract. 60s rather
+# than a tighter default: TLS-intercepting network middleboxes (seen in
+# testing) add real round-trip latency on top of the model's own response time.
+REQUEST_TIMEOUT_MS = 60_000
 
 _SYSTEM_INSTRUCTION = """\
 You will receive a single message from a Hebrew WhatsApp group chat.

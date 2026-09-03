@@ -87,6 +87,19 @@ python -m task_manager_agent.run_fixtures
 | `GOOGLE_API_KEY`   | yes      | —                     |
 | `GEMINI_MODEL`     | no       | `gemini-3.6-flash`   |
 
+## Troubleshooting
+
+- **`SSL: CERTIFICATE_VERIFY_FAILED (... key usage extension ...)`** — some
+  networks route HTTPS through a TLS-inspecting content filter (e.g. NetFree),
+  which Python's default certificate bundle won't trust. Fix: `pip install
+  pip-system-certs` in the same environment — it makes Python trust your OS's
+  certificate store instead, which the filter's root CA is usually already in.
+- **`429 RESOURCE_EXHAUSTED` / quota errors** — the Gemini free tier caps
+  requests per model per day (20/day at the time of writing). Running
+  `run_fixtures.py` (18 calls) a few times in one day will exhaust it; affected
+  messages correctly come back as `needs_review` rather than crashing the run.
+  Wait for the quota to reset or use a key with a paid tier to run repeatedly.
+
 ## Client work — secrets
 
 This is client work. `.env` holds real secrets and is gitignored — never
