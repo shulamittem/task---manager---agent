@@ -13,6 +13,11 @@ load_dotenv()
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
 
+if not GOOGLE_API_KEY:
+    raise RuntimeError(
+        "GOOGLE_API_KEY is not set. Copy .env.example to .env and fill it in."
+    )
+
 # Milliseconds, per the google-genai SDK's HttpOptions contract.
 REQUEST_TIMEOUT_MS = 30_000
 
@@ -40,12 +45,11 @@ def classify_and_extract(raw_text: str) -> ClassificationExtraction:
     response). Callers are responsible for catching and marking the message
     as needing review.
     """
-    client = genai.Client(
-        api_key=GOOGLE_API_KEY,
-        http_options=types.HttpOptions(timeout=REQUEST_TIMEOUT_MS),
-    )
-
     try:
+        client = genai.Client(
+            api_key=GOOGLE_API_KEY,
+            http_options=types.HttpOptions(timeout=REQUEST_TIMEOUT_MS),
+        )
         response = client.models.generate_content(
             model=GEMINI_MODEL,
             contents=raw_text,
@@ -55,10 +59,10 @@ def classify_and_extract(raw_text: str) -> ClassificationExtraction:
                 response_schema=ClassificationExtraction,
             ),
         )
+        parsed = response.parsed
     except Exception as e:
         raise RuntimeError(f"Gemini classify_and_extract call failed: {e}") from e
 
-    parsed = response.parsed
     if parsed is None:
         raise ValueError(
             "Gemini response could not be parsed into ClassificationExtraction"

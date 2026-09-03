@@ -5,6 +5,7 @@ Usage (from repo root):
 """
 
 import sys
+from pathlib import Path
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")
@@ -14,6 +15,12 @@ except Exception:
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# tests/ isn't part of the installed package, so make it importable
+# regardless of the caller's CWD (python -m only puts CWD on sys.path).
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 from tests.sample_messages import SAMPLE_MESSAGES
 

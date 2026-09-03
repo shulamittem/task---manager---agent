@@ -1,16 +1,22 @@
 """LangGraph graph: classify_node -> (conditional) -> extract_node -> END."""
 
+from typing import Any
+
 from langgraph.graph import END, StateGraph
+from langgraph.graph.state import CompiledStateGraph
 
 from task_manager_agent.llm import classify_and_extract
 from task_manager_agent.models import MessageState
 
 
-def classify_node(state: MessageState) -> dict:
-    """Call the LLM once to classify + extract. Never raises."""
+def classify_node(state: MessageState) -> dict[str, Any]:
+    """Call the LLM once to classify + extract. Never raises.
+
+    is_task stays None (not False) on both failure branches: a failed or
+    skipped classification means "undetermined," not "confirmed not a task."
+    """
     if not state.raw_text or not state.raw_text.strip():
         return {
-            "is_task": False,
             "needs_review": True,
             "error": "empty or non-text message payload",
         }
@@ -29,9 +35,9 @@ def classify_node(state: MessageState) -> dict:
     }
 
 
-def extract_node(state: MessageState) -> dict:
+def extract_node(state: MessageState) -> dict[str, Any]:
     """Pure normalization of fields classify_node already returned. No I/O."""
-    updates: dict = {}
+    updates: dict[str, Any] = {}
 
     if state.title is not None:
         stripped = state.title.strip()
@@ -47,7 +53,7 @@ def _route_after_classify(state: MessageState) -> str:
     return "extract_node"
 
 
-def build_graph():
+def build_graph() -> CompiledStateGraph:
     """Assemble and compile the classify -> extract graph."""
     builder = StateGraph(MessageState)
 

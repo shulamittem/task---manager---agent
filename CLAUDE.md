@@ -13,7 +13,7 @@ graph with no external services wired up.
 
 ## Stack
 
-- Python (>=3.10 — code uses `X | None` unions and `Literal`)
+- Python (>=3.10 — code uses `typing.Optional` and `Literal`)
 - LangGraph — orchestrates the classify/extract flow as a graph
 - Pydantic (v2) — schema for state and LLM output
 - Gemini via the `google-genai` SDK — model `gemini-3.6-flash`. Chosen over
